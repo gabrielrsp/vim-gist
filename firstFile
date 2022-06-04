@@ -1,0 +1,435 @@
+import React from "react";
+import TodoForm from "./TodoForm";
+import Todo from "./Todo";
+
+/*
+  TodoMVC
+  1. add todo
+  2. display todos
+  3. cross off todo
+  4. show number of active todos
+  5. filter all/active/complete
+  6. delete todo
+  7. delete all complete
+    7.1 only show if atleast one is complete
+  8. button to toggle all on/off
+*/
+
+export default class TodoList extends React.Component {
+  state = {
+    todos: [],
+    todoToShow: "all",
+    toggleAllComplete: true
+  };
+
+  addTodo = todo => {
+    this.setState(state => ({
+      todos: [todo, ...state.todos]
+    }));
+  };
+
+  toggleComplete = id => {
+    this.setState(state => ({
+      todos: state.todos.map(todo => {
+        if (todo.id === id) {
+          // suppose to update
+          return {
+            ...todo,
+            complete: !todo.complete
+          };
+        } else {
+          return todo;
+        }
+      })
+    }));
+  };
+
+  updateTodoToShow = s => {
+    this.setState({
+      todoToShow: s
+    });
+  };
+
+  handleDeleteTodo = id => {
+    this.setState(state => ({
+      todos: state.todos.filter(todo => todo.id !== id)
+    }));
+  };
+
+  removeAllTodosThatAreComplete = () => {
+    this.setState(state => ({
+      todos: state.todos.filter(todo => !todo.complete)
+    }));
+  };
+
+  render() {
+    let todos = [];
+
+    if (this.state.todoToShow === "all") {
+      todos = this.state.todos;
+    } else if (this.state.todoToShow === "active") {
+      todos = this.state.todos.filter(todo => !todo.complete);
+    } else if (this.state.todoToShow === "complete") {
+      todos = this.state.todos.filter(todo => todo.complete);
+    }
+
+    return (
+      <div>
+        <TodoForm onSubmit={this.addTodo} />
+        {todos.map(todo => (
+          <Todo
+            key={todo.id}
+            toggleComplete={() => this.toggleComplete(todo.id)}
+            onDelete={() => this.handleDeleteTodo(todo.id)}
+            todo={todo}
+          />
+        ))}
+        <div>
+          todos left: {this.state.todos.filter(todo => !todo.complete).length}
+        </div>
+        <div>
+          <button onClick={() => this.updateTodoToShow("all")}>all</button>
+          <button onClick={() => this.updateTodoToShow("active")}>
+            active
+          </button>
+          <button onClick={() => this.updateTodoToShow("complete")}>
+            complete
+          </button>
+        </div>
+        {this.state.todos.some(todo => todo.complete) ? (
+          <div>
+            <button onClick={this.removeAllTodosThatAreComplete}>
+              remove all complete todos
+            </button>
+          </div>
+        ) : null}
+        <div>
+          <button
+            onClick={() =>
+              this.setState(state => ({
+                todos: state.todos.map(todo => ({
+                  ...todo,
+                  complete: state.toggleAllComplete
+                })),
+                toggleAllComplete: !state.toggleAllComplete
+              }))
+            }
+          >
+            toggle all complete: {`${this.state.toggleAllComplete}`}
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+/*
+///// VIM STUDIES /////
+
+***********************   DAY 1/6   ********************
+
+i // insertion mode
+esc or ctrl + c or ctrl + [  // back to command mode
+
+:q   quit
+:wq save and quit
+:w just save
+:q! force quit without saving
+
+
+////////////  command mode ////////
+
+h - left
+j - down
+k - up
+l - right
+
+*************************************************
+*************************************************
+*************************************************
+*************************************************
+*************************************************
+*************************************************
+*************************************************
+*************************************************
+
+dd (twice) - deletes just the line where the cursor is
+u - undo a change
+ctrl + r - redo a change
+g - go to bottom of file
+gg - got to top of file
+
+
+yy - copy to clipboard (just the line where cursor is)
+p - paste down below the cursor line
+shift + p -  paste up the cursor line
+
+yw - copy rest of word starting from cursor (when pasted with 'p' is pasted just in front where the cursor is)
+y + i + w - copy a word no matter where the cursor is in the word
+d + i + w - deletes a word no matter 
+yj - copy cursor line and next line below (2 lines copy!)
+
+shift + p - paste line up (only for 'yy' or 'yj')
+
+w- move cursor to initial of next word in cursor line
+b- move back to initial of a word
+
+e- move cursor to end of a word
+ge- move back to end of previous word
+
+shift + v - highlight a line, if you press 'j' or 'k'  it will highlight or unhighlight lines
+TO IDENT PRESS > OR < !!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT
+v - start highlight some portion
+
+ NOTE: if you press y (yanke) when something is highlighted, it will copy, ONLY WHAT IS HIGHLIGHTED, NO LINE ABOVE OR BELOW!!  p will paste ahead cursor, shift + p behind cursor
+
+dw - delete a word
+dj - delete cursor line also next line below (2 lines!!!)
+
+
+asdjkfhasdjkfsdhfklasdf dfsajklfhadf dfdjskfhdsf jkfdasfjs
+fsdafh dsjklfhasdjfsdklfsdhf fsdajkfh fdjkasfh fhffhsdf fjkldshafjkdsfaj  dsfjkfhsdkf
+
+
+{ or } - jump through blocks (put cursor on blankspaces)
+//////////////////////////////
+
+
+
+1aadjkasd
+
+
+ 1aadjkasd djksahdjkashd djsahdasjkd djaskdhasjkdh dasjkdhajks
+2bbbbbadjkashdjkas dajkshdasjk djksadhjkas dhasjkdhjk 
+3ccccsadjkashdjkasdhkasjdjkas jkdhsjkadasjdh
+
+sahdjasdhasjkdhajkdhaskdhasjkdadasd
+
+word. is two words
+
+
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+
+********************************   DAY 2/6   *************************************
+
+
+o - switch to insert mode on line created below cursor
+shift + o - switch to insert mode on line created above cursor
+
+shift + p - paste on line up after copy with yy 
+
+a - move over cursor 1 step forward cursor and switch to insert mode
+
+shift + i - TAKE TO THE BEGGINING OF LINE ON INSERT MODE
+shift + a - TAKE TO THE END OF LINE ON INSERT MODE
+
+shift + p - paste on line up after copy with yy 
+slash / - open search mode, * hops forward through results, # hops backwards
+
+
+
+
+*********************************    DAY 3/6     ***********************************
+
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+***********************************************************
+
+1********************
+2********************
+3********************
+4********************
+
+
+f + character - cursor on NEXT first character occurrence (CASE SENSITIVE!!)
+shift + f + character - same but backwards
+
+t + character - cursor right behind NEXT first character occurrence 
+shift + t + character - same but BACKWARDS
+
+; - to repeat command for the next same results
+, - repeat command but backwards
+
+NOTE: (t and f works ONLY IN LINE!)
+
+shift + 4 (dolar sign) - jump to end of line  $Final!!!
+0 go to begin of line
+
+x - delete SINGLE character where cursor is
+s - delete a single character where cursor is and SWITCH to insert mode
+
+c - JUST LIKE 'd' but with INSERT MODE,(cc, cw, cj)
+
+d+t + character - deletes everthing from line cursor until just behind first 'character' ocurrence (remember you can use 'c' !!!!)
+d+f + character - same as above but deletes also the 'character'
+
+NOTE: the t and f can be combined with v for highlights, y for yanke and c to remove something and switch to insert mode ( {d,c,y,v} + f/t + character )
+
+v+f+ character + y for example will yanke from cursor until character occurrence
+
+shift + d - DELETES THE REST OF THE LINE
+shift + c - DELETES THE REST OF THE LINE AND SWITCH TO INSERT MODE
+
+shift + s - DELETES ENTIRE LINE AND SWITCH TO INSERT MODE  (s de sai linha e switch insert)
+
+NOTE: CASE SENSITIVE FOR THE TIPS ABOVE!
+
+
+************************ DAY 4/6 *********************
+
+: + 'number of line' - navigate to specific line by its number
+
+OR
+
+'number of line' + G -  navigate to specific line by its number
+
+'number of line' + {h,j,k,l} - navigate accordinly with number of lines (vertically) or words (horizontally)
+
+
+shift + 5 (or '%') - navigate between curly braces (or brackets or parenthesis) that match each other <<<<<<<<<<< IMPORTANT!!!!
+
+
+function test() {
+    console.log('this is just a test')
+
+    console.log('try using % to navigate between curly braces')
+
+    const arrowfunction = () => {
+
+        console.log('try use % to navigate between brackets')
+
+        const arr = [ 3, 2, 3, 4, 5, 6] // also works for brackets!
+        function print() {
+            console.log('a')
+          }
+        }
+  }
+
+d + 4 + d - Deletes next 4 lines BELOW
+d + 4 + w - Deletes next 4 word
+
+111111111111111111111  22222222  333333333333 44444444 55555555 6666666
+22222222222222222222
+333333333333333333
+444444444444444
+5555555555555
+6666666666
+
+function p () {
+    function x () {
+        test
+      }
+  }
+
+shift + v + 3 + j -> Highlight the next 3 lines below
+
+d + 4 + d -> Deletes next 4 lines below
+
+d + i + '{' -> Deletes whats inside curly braces (starting from where cursor is!) d(elete) + i(nside) + { or [ or ( 
+
+d + 2 + i + '{' -> Deletes the insides of the first 2 curly braces (STARTING FROM THE INSIDE!! )
+
+c + i + p -> Deletes a paragraph and SWITCH to insert mode
+
+y + i + '(' -> Copy what's inside a parenthesis (IT ALSO WORKS WITH BRACKETS! [], try v+i+[ for example ) 
+
+NOTE: TRY THE COMANDS ABOVE WITH 'c' 'y' and 'v' 
+
+2 NOTE: IF YOU USE 'a' instead of 'i' it will both highlight the inside PLUS the surrounding characters
+--------------------------------
+	TRY HERE!
+
+
+  updateTodoToShow = s => {
+    this.setState({
+      todoToShow: s
+   });
+ };
+
+function () {
+    function ab() {
+	function abc() {
+	    console.log('test')
+	}
+    }
+}
+
+function(a, b, c)
+
+const arr = [1,2,3,4,5]
+
+
+--------------------------------
+
+d + i + w -> deletes the current word, not like d+w that only deletes from where cursor is (REMEMBER TO TRY WITH 'c', 'v' and 'y'!!!)  <<<<<<<<<<<< IMPORTANT
+
+
+///////////////////////////////////////////
+
+
+********************************************
+********************************************
+********************************************
+********************************************
+********************************************
+********************************************
+********************************************
+********************************************
+
+******************************** DAY 5/6 **************************
+
+
+
+MARKS
+
+
+m + 1,2,3,4,5 - Will set a local Mark on line
+' + 1,2,3,4,5  (quote + number) - Will take you where o set the LOCAL marker
+
+m + shift + h (capital H) - set a GLOBAL Mark on the current line (no matter wich file you are it will take you there)
+
+ctrl + w + o -> closes everything but current buffer
+
+ctrl + w + v -> split vertically buffer
+ctrl + w + (h or l -> move left and right buffet, j or k, move up and down buffers)
+
+ctrl + w + s -> split horizontally buffer
+
+
+resize number -> resize amount of rows you want to display (horizontally)
+BETTER!! ctrl + arrow, up, down, left right
+
+vertical resize number -> resize amount of columns to display vertically
+
+ctrl + w + = -> get back to original resize (evenly spread) 
+
+// coment,  space + / uncomment
+
+ctrl + h switch to explorer <<<<<<< !!!
+ctrl + l swtich to buffer  <<<<<<<< !!!
+
+shift + l or shift + right (move left and right through buffers)
+
+
+press 'a' on explorer -> you will be able to create a new file
+
+press 'r' to rename a file
+
+press 'd' to delete a file
